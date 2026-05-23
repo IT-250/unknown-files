@@ -1,0 +1,94 @@
+volatile int pulseCount = 0;
+float flowRate = 0;
+float totalLiters = 0;
+
+void IRAM_ATTR pulseCounter() {
+  pulseCount++;
+}
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(2, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(2), pulseCounter, RISING);
+}
+
+void loop() {
+  pulseCount = 0;
+  interrupts();
+  delay(1000);
+  noInterrupts();
+  
+  flowRate = pulseCount / 7.5; // L/min
+  totalLiters += flowRate / 60;
+  
+  Serial.print("Flow rate: ");
+  Serial.print(flowRate);
+  Serial.print(" L/min, Total: ");
+  Serial.print(totalLiters);
+  Serial.println(" L");
+  
+  delay(2000);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include <ESP8266WiFi.h>
+
+const char* ssid = "your_SSID";
+const char* password = "your_PASSWORD";
+const char* server = "192.168.x.x";
+const int serverPort = 80;
+
+WiFiClient client;
+volatile int pulseCount = 0;
+float flowRate = 0;
+
+void ICACHE_RAM_ATTR pulseCounter() {
+  pulseCount++;
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(2, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(2), pulseCounter, RISING);
+  
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi connected");
+}
+
+void loop() {
+  pulseCount = 0;
+  interrupts();
+  delay(1000);
+  noInterrupts();
+  
+  flowRate = pulseCount / 7.5; // L/min
+  
+  if (client.connect(server, serverPort)) {
+    String postData = "flow_rate=" + String(flowRate);
+    client.print("POST /insert_flow.php HTTP/1.1\r\n");
+    client.print("Host: " + String(server) + "\r\n");
+    client.print("Content-Type: application/x-www-form-urlencoded\r\n");
+    client.print("Content-Length: " + String(postData.length()) + "\r\n\r\n");
+    client.print(postData);
+    client.stop();
+  }
+  
+  delay(10000);
+}

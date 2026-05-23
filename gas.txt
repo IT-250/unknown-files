@@ -1,0 +1,62 @@
+Arduino
+int gasSensor = A0;
+int ledRed = 9;
+int ledGreen = 8;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(gasSensor, INPUT);
+  pinMode(ledRed, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+}
+
+void loop() {
+  int gasValue = analogRead(gasSensor);
+  Serial.print("Gas Value: ");
+  Serial.println(gasValue);
+
+  if (gasValue > 400) {
+    digitalWrite(ledRed, HIGH);
+    digitalWrite(ledGreen, LOW);
+    Serial.println("Gas detected!");
+  } else {
+    digitalWrite(ledRed, LOW);
+    digitalWrite(ledGreen, HIGH);
+  }
+  delay(500);
+}
+
+
+
+ESP
+
+#include <ESP8266WiFi.h>
+const char* ssid = "your_SSID";
+const char* password = "your_PASS";
+const char* server = "your_server_ip";
+WiFiClient client;
+
+int gasSensor = A0;
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("WiFi connected");
+}
+
+void loop() {
+  int gasValue = analogRead(gasSensor);
+  if (client.connect(server, 80)) {
+    String postData = "gas_value=" + String(gasValue);
+    client.print("POST /insert_gas.php HTTP/1.1\n");
+    client.print("Host: " + String(server) + "\n");
+    client.print("Content-Type: application/x-www-form-urlencoded\n");
+    client.print("Content-Length: " + String(postData.length()) + "\n\n");
+    client.print(postData);
+  }
+  delay(10000);
+}

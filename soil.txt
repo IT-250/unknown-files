@@ -1,0 +1,76 @@
+int soilPin = A0;
+int ledRed = 9; // dry
+int ledGreen = 8; // wet
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(soilPin, INPUT);
+  pinMode(ledRed, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+}
+
+void loop() {
+  int moisture = analogRead(soilPin);
+  Serial.print("Moisture: ");
+  Serial.println(moisture);
+
+  if (moisture > 700) { // dry
+    digitalWrite(ledRed, HIGH);
+    digitalWrite(ledGreen, LOW);
+  } else {
+    digitalWrite(ledRed, LOW);
+    digitalWrite(ledGreen, HIGH);
+  }
+  delay(500);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int soilPin = A0;
+int ledRed = 9; // dry
+int ledGreen = 8; // wet
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(soilPin, INPUT);
+  pinMode(ledRed, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+}
+
+void loop() {
+  int moisture = analogRead(soilPin);
+  Serial.print("Moisture: ");
+  Serial.println(moisture);
+
+  if (moisture > 700) { // dry
+    digitalWrite(ledRed, HIGH);
+    digitalWrite(ledGreen, LOW);
+  } else {
+    digitalWrite(ledRed, LOW);
+    digitalWrite(ledGreen, HIGH);
+  }
+  delay(500);
+}

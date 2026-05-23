@@ -1,0 +1,74 @@
+int pirPin = 3;
+int ledPin = 13;
+int buzzerPin = 9;
+int pirState = LOW;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(pirPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+}
+
+void loop() {
+  pirState = digitalRead(pirPin);
+  
+  if (pirState == HIGH) {
+    digitalWrite(ledPin, HIGH);
+    digitalWrite(buzzerPin, HIGH);
+    Serial.println("Motion detected!");
+  } else {
+    digitalWrite(ledPin, LOW);
+    digitalWrite(buzzerPin, LOW);
+  }
+  
+  delay(100);
+}
+
+
+
+
+
+
+
+
+
+
+
+#include <ESP8266WiFi.h>
+
+const char* ssid = "your_SSID";
+const char* password = "your_PASSWORD";
+const char* server = "192.168.x.x";
+const int serverPort = 80;
+
+WiFiClient client;
+int pirPin = 5;  // D1 on ESP-12E
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(pirPin, INPUT);
+  
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi connected");
+}
+
+void loop() {
+  int motionDetected = digitalRead(pirPin);
+  
+  if (client.connect(server, serverPort)) {
+    String postData = "motion_detected=" + String(motionDetected);
+    client.print("POST /insert_pir.php HTTP/1.1\r\n");
+    client.print("Host: " + String(server) + "\r\n");
+    client.print("Content-Type: application/x-www-form-urlencoded\r\n");
+    client.print("Content-Length: " + String(postData.length()) + "\r\n\r\n");
+    client.print(postData);
+    client.stop();
+  }
+  
+  delay(5000);
+}
